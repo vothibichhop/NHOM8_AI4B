@@ -1,4 +1,4 @@
-const URL = "https://teachablemachine.withgoogle.com/models/XXXXXXX/";
+const URL = "hhttps://teachablemachine.withgoogle.com/models/iXHC6tbDr/";
 
 let model, maxPredictions;
 let warningActive = false;
@@ -79,4 +79,5 @@ function hideWarning() {
 }
 
 init();
+
 
