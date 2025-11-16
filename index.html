@@ -1,52 +1,95 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Nhận diện vật cản cho người khiếm thị</title>
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhận Diện Vật Cản Cho Người Khiếm Thị</title>
+    
+    <style>
+        body { text-align: center; font-family: sans-serif; }
+        #loading-message { color: #555; margin-top: 20px; font-size: 1.2em; }
+        #webcam-container { margin: 20px auto; border: 1px solid #ccc; display: inline-block; }
+    </style>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 
-  <style>
-    body {
-      font-family: Arial;
-      text-align: center;
-      background: #eef2f3;
-      padding-top: 20px;
-    }
-    video {
-      border-radius: 10px;
-      box-shadow: 0 0 10px #aaa;
-    }
-    #warning {
-      font-size: 28px;
-      font-weight: bold;
-      padding: 15px;
-      margin-top: 20px;
-      background: red;
-      color: white;
-      border-radius: 10px;
-      display: none;
-    }
-    #label {
-      font-size: 22px;
-      margin-top: 15px;
-    }
-  </style>
 </head>
-
 <body>
 
-  <h2>Hệ thống nhận diện vật cản</h2>
+    <h1>Nhận diện vật cản cho người khiếm thị</h1>
 
-  <video id="webcam" width="350" height="260" autoplay playsinline></video>
+    <button type="button" onclick="init()">BẮT ĐẦU NHẬN DIỆN</button>
+    <div id="loading-message"></div>
 
-  <div id="label">Đang tải mô hình...</div>
+    <div id="webcam-container"></div>
+    <div id="label-container"></div>
 
-  <div id="warning">⚠ CẢNH BÁO: Có vật cản phía trước!</div>
+    <script type="text/javascript">
+        // Thay thế YOUR_MODEL_ID bằng ID mô hình thực tế bạn nhận được
+        // Ví dụ: const URL = "https://teachablemachine.withgoogle.com/models/iXHC6tbDr/";
+        const URL = "https://teachablemachine.withgoogle.com/models/[...]/"; // VUI LÒNG CẬP NHẬT URL CỦA BẠN
+        
+        let model, webcam, labelContainer, maxPredictions;
 
-  <audio id="alertSound" src="obstacle.mp3"></audio>
+        // Hàm khởi tạo mô hình và webcam
+        async function init() {
+            // Hiển thị thông báo tải
+            document.getElementById("loading-message").innerHTML = "Đang tải mô hình...";
 
-  <script src="script.js"></script>
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            try {
+                // 1. Tải mô hình và metadata
+                model = await tmImage.load(modelURL, metadataURL);
+                maxPredictions = model.getTotalClasses();
+
+                // 2. Thiết lập webcam
+                const flip = true; 
+                webcam = new tmImage.Webcam(200, 200, flip); // Webcam 200x200
+                await webcam.setup();
+                await webcam.play();
+                window.requestAnimationFrame(loop);
+
+                // 3. Hiển thị webcam và label container
+                document.getElementById("webcam-container").appendChild(webcam.canvas);
+                labelContainer = document.getElementById("label-container");
+                for (let i = 0; i < maxPredictions; i++) {
+                    labelContainer.appendChild(document.createElement("div"));
+                }
+                
+                // 4. Ẩn thông báo tải và thông báo thành công
+                document.getElementById("loading-message").innerHTML = "Đã tải mô hình thành công. Đang nhận diện...";
+                
+            } catch (error) {
+                console.error("Lỗi khi tải hoặc khởi tạo mô hình:", error);
+                document.getElementById("loading-message").innerHTML = "LỖI: Không thể tải mô hình. Vui lòng kiểm tra URL mô hình và kết nối mạng.";
+            }
+        }
+
+        // Vòng lặp chính để cập nhật khung hình và chạy dự đoán
+        async function loop() {
+            if (webcam) {
+                webcam.update();
+                await predict();
+            }
+            window.requestAnimationFrame(loop);
+        }
+
+        // Hàm dự đoán kết quả
+        async function predict() {
+            // Dự đoán
+            const prediction = await model.predict(webcam.canvas);
+            
+            // Hiển thị kết quả nhận diện
+            for (let i = 0; i < maxPredictions; i++) {
+                const classPrediction = 
+                    prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+                labelContainer.childNodes[i].innerHTML = classPrediction;
+            }
+        }
+    </script>
 
 </body>
 </html>
