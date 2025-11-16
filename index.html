@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Nhận diện vật cản</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f0f0f0;
+      transition: background-color 0.3s;
+    }
+    h1 { margin-top: 20px; }
+    #webcam-container { margin: 20px auto; }
+    #label-container { margin-top: 20px; font-size: 20px; color: #333; }
+    #alert-container {
+      margin-top: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      display: inline-block;
+      background-color: green;
+    }
+  </style>
+</head>
+<body>
+  <h1>Nhận diện vật cản cho người khiếm thị</h1>
+
+  <div id="webcam-container">
+    <video id="webcam" autoplay playsinline width="400"></video>
+  </div>
+
+  <div id="label-container"></div>
+  <div id="alert-container"> Không có vật cản</div>
+
+  <!-- Thư viện TensorFlow.js và Teachable Machine -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image"></script>
+  <script src="script.js"></script>
+</body>
+</html>
