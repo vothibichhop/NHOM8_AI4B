@@ -1,134 +1,30 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Nhận diện vật cản cho người khiếm thị</title>
+  <title>Obstacle Detection</title>
 
-  <!-- Thư viện TensorFlow.js -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image"></script>
+  <!-- p5.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.5.0/p5.min.js"></script>
+  <!-- p5.sound -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.5.0/addons/p5.sound.min.js"></script>
+  <!-- ml5.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ml5/0.12.2/ml5.min.js"></script>
 
   <style>
     body {
-      font-family: Arial;
-      text-align: center;
-      background: #eef2f3;
-      padding-top: 20px;
-    }
-    video {
-      border-radius: 10px;
-      box-shadow: 0 0 10px #aaa;
-    }
-    #warning {
-      font-size: 28px;
-      font-weight: bold;
-      padding: 15px;
-      margin-top: 20px;
-      background: red;
+      background: #111;
       color: white;
-      border-radius: 10px;
-      display: none;
-    }
-    #label {
-      font-size: 22px;
-      margin-top: 15px;
+      text-align: center;
+      font-family: Arial;
     }
   </style>
 </head>
-
 <body>
+  <h2>AI Nhận Diện Vật Cản</h2>
+  <p>Webcam sẽ tự bật và mô hình sẽ bắt đầu nhận diện...</p>
 
-  <h2>Hệ thống nhận diện vật cản</h2>
-
-  <video id="webcam" width="350" height="260" autoplay playsinline></video>
-
-  <div id="label">Đang tải mô hình...</div>
-
-  <div id="warning">⚠ CẢNH BÁO: Có vật cản phía trước!</div>
-
-  <!-- Âm thanh cảnh báo -->
-  <audio id="alertSound" src="obstacle.mp3"></audio>
-
-  <!------------------------ CODE NHẬN DIỆN ------------------------->
-  <script>
-    // 👉 THAY LINK MÔ HÌNH CỦA BẠN VÀO ĐÂY
-    const URL = "https://teachablemachine.withgoogle.com/models/iXHC6tbDr/";
-
-    let model, maxPredictions;
-    let warningActive = false;
-
-    async function init() {
-        try {
-            model = await tmImage.load(URL + "model.json", URL + "metadata.json");
-            maxPredictions = model.getTotalClasses();
-            document.getElementById("label").innerHTML = "Mô hình đã tải!";
-        } catch (e) {
-            document.getElementById("label").innerHTML = "❌ Không tải được mô hình!";
-            console.error(e);
-            return;
-        }
-
-        const webcam = document.getElementById("webcam");
-
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            webcam.srcObject = stream;
-
-            webcam.addEventListener("loadeddata", () => {
-                predict();
-            });
-        } catch (err) {
-            alert("Không bật được webcam! Hãy Allow camera hoặc chạy bằng HTTPS.");
-            console.error(err);
-        }
-    }
-
-    async function predict() {
-        const webcam = document.getElementById("webcam");
-        const prediction = await model.predict(webcam);
-
-        let bestLabel = "";
-        let bestProb = 0;
-
-        prediction.forEach(p => {
-            if (p.probability > bestProb) {
-                bestProb = p.probability;
-                bestLabel = p.className;
-            }
-        });
-
-        document.getElementById("label").innerHTML =
-            "Nhận diện: <b>" + bestLabel + "</b> (" + Math.round(bestProb * 100) + "%)";
-
-        if (bestProb > 0.8 && bestLabel !== "Không vật cản") {
-            showWarning();
-        } else {
-            hideWarning();
-        }
-
-        requestAnimationFrame(predict);
-    }
-
-    function showWarning() {
-        const warningDiv = document.getElementById("warning");
-        const sound = document.getElementById("alertSound");
-
-        warningDiv.style.display = "block";
-
-        if (!warningActive) {
-            sound.play();
-            warningActive = true;
-        }
-    }
-
-    function hideWarning() {
-        document.getElementById("warning").style.display = "none";
-        warningActive = false;
-    }
-
-    init();
-  </script>
-
+  <!-- File JS chính -->
+  <script src="script.js"></script>
 </body>
 </html>
-
